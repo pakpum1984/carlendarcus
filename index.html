@@ -88,148 +88,164 @@ font-size: 13px;
 
   <script>
 
-    function updateCalendarcus() {
-        $.ajax({
-            url: 'https://script.google.com/macros/s/AKfycbzQziMYIKPG0-tzvKTshmAYzk5IGOU-7-jPTZEQRS8_4ySy4jYngXqtUlXYea3TDJNGwQ/exec',
-            dataType: 'json',
-            success: function(data) {
-              var events = [];
 
-              // สร้าง events จากข้อมูลที่ได้รับ
-              for (var i = 0; i < data.length; i++) {
-                var event = {
-                  title: data[i].title,
-                  namecus: data[i].namecus,
-                  start: moment(data[i].start).toDate(), // แปลงเป็นวัตถุ Date
-                  end: moment(data[i].end).add(1, 'days').toDate(), // แปลงเป็นวัตถุ Date และเพิ่มหนึ่งวัน
-                  piccus: data[i].piccus,
-                  namesavecus: data[i].namesavecus,
-                  locacus: data[i].locacus,
-                  timesavecus: data[i].timesavecus
-                }
+            function updateCalendarcus() {
+                $.ajax({
+                    url: 'https://script.google.com/macros/s/AKfycbzQziMYIKPG0-tzvKTshmAYzk5IGOU-7-jPTZEQRS8_4ySy4jYngXqtUlXYea3TDJNGwQ/exec',
+                    dataType: 'json',
+                    success: function(data) {
+                    var events = [];
 
-                events.push(event);
-              }
-                localStorage.setItem('cachedDatacus', JSON.stringify(data));
-                renderDatacus(data);
-                 $.LoadingOverlay("hide");
-            },
-            error: function() {
-                alert('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+                  // สร้าง events จากข้อมูลที่ได้รับ
+                  for (var i = 0; i < data.length; i++) {
+                    var event = {
+                      title: data[i].title,
+                      namecus: data[i].namecus,
+                      start: data[i].start +'T'+'00:00:00',
+                      end: data[i].end +'T'+'23:59:59',
+                      piccus: data[i].piccus,
+                      namesavecus: data[i].namesavecus,
+                      locacus: data[i].locacus,
+                      timesavecus: data[i].timesavecus
+                    }
+
+                    events.push(event);
+                  }
+
+
+                        localStorage.setItem('cachedDatacus', JSON.stringify(events));
+                        renderDatacus(events);
+                         $.LoadingOverlay("hide");
+                    },
+                    error: function() {
+                        alert('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+                    }
+                });
             }
-        });
-    }
 
-  
-    function renderDatacus(data) {
-            $('#calendarcus').fullCalendar('destroy'); 
-            $('#calendarcus').fullCalendar({
-    header: {
-      left: 'prev,next today',
-      center: 'title',
-      right: 'month'
-    },
-    height: 'auto',
-    editable: true,
-    timezone: 'local',
-    locale: 'th',
-    nextDayThreshold: '00:00:00',
-    dayNamesShort: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
-eventRender: function(event, element) {
-  // ตรวจสอบว่า event เกิดขึ้นในเดือนที่กำลังแสดงหรือไม่
-  var calendarDate = $('#calendarcus').fullCalendar('getDate');
-  var currentMonth = calendarDate.month();
-  var currentYear = calendarDate.year();
-  var eventMonth = moment(event.start).month();
-  var eventYear = moment(event.start).year();
 
-  if (eventMonth === currentMonth && eventYear === currentYear) {
-    element.find('.fc-time').hide();
+            function renderDatacus(data) {
+                    $('#calendarcus').fullCalendar('destroy'); 
+                    $('#calendarcus').fullCalendar({
+            header: {
+              left: 'prev,next today',
+              center: 'title',
+              right: 'month'
+            },
+            height: 'auto',
+            editable: true,
+            timezone: 'local',
+            locale: 'th',
+            nextDayThreshold: '00:00:0',
+            dayNamesShort: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
+        eventRender: function(event, element) {
+
+        
+          
+          
+          // ตรวจสอบว่า event เกิดขึ้นในเดือนที่กำลังแสดงหรือไม่
+          var calendarDate = $('#calendarcus').fullCalendar('getDate');
+          var currentMonth = calendarDate.month();
+          var currentYear = calendarDate.year();
+          var eventMonth = moment(event.start).month();
+          var eventYear = moment(event.start).year();
+
+          if (eventMonth === currentMonth && eventYear === currentYear) {
+
+    
+            
+            element.find('.fc-time').hide();
     element.find('.fc-title').html(event.namecus + '<br>' + event.locacus);
 
-    if (event.locacus === 'CM2') {
-      element.css('background-color', '#1E90FF');
-    } else if (event.locacus === 'CM1') {
-      element.css('background-color', '#CD5C5C');
-    } else if (event.locacus === 'CM1/CM2') {
-      element.css('background-color', '#8470FF');
-    } else if (event.locacus === 'Gofield') {
-      element.css('background-color', '#76bc43');
-    }
-  } else {
-    // ซ่อน event ถ้าไม่ใช่เดือนที่กำลังแสดง
-    element.hide();
-  }
-  
-},
 
 
 
 
-              events: data,
-    eventClick: function(event) {
-      // แสดง Popup รายละเอียดเมื่อคลิกที่ event
-      Swal.fire({
-        html: `
-          <br>
-          <table class='table table-bordered table-striped table-hover text-start' style="width:100%">
-            <tr style="text-align: center; color: blue;">
-              <img src="${event.piccus}" alt="รูป" style="width: 100%; height: auto; max-width: 600px;">
-            </tr>
-            <tr>
-              <th scope='col'>ชื่อ</th>
-              <td style="color:blue;">${event.namecus}</td>
-            </tr>
-            <tr>
-              <th scope='col'>เข้า</th>
-              <td style="color:blue;">${event.locacus}</td>
-            </tr>
-            <tr>
-              <th scope='col'>วันที่ </th>
-              <td style="color:blue;">${moment(event.start).format('DD-MM-YYYY')} - ${moment(event.end).subtract(1, 'days').format('DD-MM-YYYY')}</td>
-            </tr>
-            <tr>
-              <th scope='col'>ชื่อผู้บันทึก</th>
-              <td style="color:blue;">${event.namesavecus}</td>
-            </tr>
-          </table>
-        `,
-        confirmButtonText: 'ปิด',
-        showCloseButton: true,
-        customClass: {
-          popup: 'swal-wide', // เพิ่มคลาสที่กำหนดให้รูปภาพเต็มหน้าจอ
-        },
-        width: 'auto', // ตั้งค่า width เป็น auto เพื่อให้ Swal.fire ปรับขนาดให้เหมาะสม
-        imageAlt: 'รูป', // ข้อความที่จะแสดงใน alt attribute ของรูป
-      });
-    }
-  });
-  }
 
-    $(document).ready(function() {
-        $.LoadingOverlaySetup({
-            size: "12",
-            imageColor: "#0d6efd"
-        });
-        $.LoadingOverlay("show");
-          var cachedDatacus = localStorage.getItem('cachedDatacus');
 
-          if (cachedDatacus) {
-              var parsedDatacus = JSON.parse(cachedDatacus);
-              renderDatacus(parsedDatacus);
-            $.LoadingOverlay("hide");
+            
+            if (event.locacus === 'CM2') {
+              element.css('background-color', '#1E90FF');
+            } else if (event.locacus === 'CM1') {
+              element.css('background-color', '#CD5C5C');
+            } else if (event.locacus === 'CM1/CM2') {
+              element.css('background-color', '#8470FF');
+            } else if (event.locacus === 'Gofield') {
+              element.css('background-color', '#76bc43');
+            }
           } else {
-              updateCalendarcus();
+            // ซ่อน event ถ้าไม่ใช่เดือนที่กำลังแสดง
+            element.hide();
           }
 
-      });
+        },
 
-    // อัปเดตปฏิทินเมื่อรีเฟรชหน้าจอ
-    $(window).on('load', function() {
-        updateCalendarcus();
 
-    });
 
+
+                      events: data,
+            eventClick: function(event) {
+              // แสดง Popup รายละเอียดเมื่อคลิกที่ event
+              Swal.fire({
+                html: `
+                  <br>
+                  <table class='table table-bordered table-striped table-hover text-start' style="width:100%">
+                    <tr style="text-align: center; color: blue;">
+                      <img src="${event.piccus}" alt="รูป" style="width: 100%; height: auto; max-width: 600px;">
+                    </tr>
+                    <tr>
+                      <th scope='col'>ชื่อ</th>
+                      <td style="color:blue;">${event.namecus}</td>
+                    </tr>
+                    <tr>
+                      <th scope='col'>เข้า</th>
+                      <td style="color:blue;">${event.locacus}</td>
+                    </tr>
+                    <tr>
+                      <th scope='col'>วันที่ </th>
+                      <td style="color:blue;">${event.start.format('DD - ') + moment(event.end).format('DD/MM/YYYY')}</td>
+                    </tr>
+                    <tr>
+                      <th scope='col'>ชื่อผู้บันทึก</th>
+                      <td style="color:blue;">${event.namesavecus}</td>
+                    </tr>
+                  </table>
+                `,
+                confirmButtonText: 'ปิด',
+                showCloseButton: true,
+                customClass: {
+                  popup: 'swal-wide', // เพิ่มคลาสที่กำหนดให้รูปภาพเต็มหน้าจอ
+                },
+                width: 'auto', // ตั้งค่า width เป็น auto เพื่อให้ Swal.fire ปรับขนาดให้เหมาะสม
+                imageAlt: 'รูป', // ข้อความที่จะแสดงใน alt attribute ของรูป
+              });
+            }
+          });
+          }
+
+            $(document).ready(function() {
+                $.LoadingOverlaySetup({
+                    size: "12",
+                    imageColor: "#0d6efd"
+                });
+                $.LoadingOverlay("show");
+                  var cachedDatacus = localStorage.getItem('cachedDatacus');
+
+                  if (cachedDatacus) {
+                      var parsedDatacus = JSON.parse(cachedDatacus);
+                      renderDatacus(parsedDatacus);
+                    $.LoadingOverlay("hide");
+                  } else {
+                      updateCalendarcus();
+                  }
+
+              });
+
+            // อัปเดตปฏิทินเมื่อรีเฟรชหน้าจอ
+            $(window).on('load', function() {
+                updateCalendarcus();
+
+            });
 
   </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
